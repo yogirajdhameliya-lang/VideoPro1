@@ -6,7 +6,7 @@ import { VideoMetadata } from "../types";
 const MODEL_NAME = "gemini-3-flash-preview";
 
 export async function analyzeVideoUrl(url: string): Promise<VideoMetadata> {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
   
   try {
     const response = await ai.models.generateContent({
@@ -46,7 +46,11 @@ export async function analyzeVideoUrl(url: string): Promise<VideoMetadata> {
       },
     });
 
-    return JSON.parse(response.text.trim());
+    const text = response.text;
+    if (!text) {
+      throw new Error("Empty response from AI");
+    }
+    return JSON.parse(text.trim());
   } catch (error) {
     console.error("Gemini Analysis Error:", error);
     // Sophisticated Fallback Mock Data based on URL hints
